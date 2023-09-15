@@ -1,0 +1,33 @@
+version: "3"
+
+networks:
+  loki:
+
+services:
+  promtail:
+    image: ${PROMTAIL_IMAGE}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /containerd/docker/containers:/var/lib/docker/containers
+      - ./cfg/promtail/config.yml:/etc/promtail/config.yml
+    # command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
+
+  loki:
+    image: ${LOKI_IMAGE}
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./cfg/loki/local-config.yaml:/etc/loki/local-config.yaml
+      - ./loki:/loki
+    # command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: ${GRAFANA_IMAGE}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+      #- ./grafana.ini:/etc/grafana/grafana.ini
+      #- ./defaults.ini:/usr/share/grafana/conf/defaults.ini
